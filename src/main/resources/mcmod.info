@@ -1,10 +1,10 @@
 [
 {
-  "modid": "FTBI",
-  "name": "FTB Islands",
+  "modid": "${modId}",
+  "name": "${modName}",
   "description": "A mod to assist in creating Islands in FTB Infinity Evolved Skyblock",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
+  "version": "${modVersion}",
+  "mcversion": "${minecraftVersion}",
   "url": "",
   "updateUrl": "",
   "authorList": ["Cricket", "Kolatra"],

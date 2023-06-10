@@ -1,7 +1,5 @@
 package com.cricketcraft.ftbisland.commands;
 
-import com.cricketcraft.ftbisland.IslandUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +8,10 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 
+import com.cricketcraft.ftbisland.IslandUtils;
+
 public class SetIslandSpawnCommand extends CommandBase implements ICommand {
+
     private List<String> aliases;
 
     public SetIslandSpawnCommand() {

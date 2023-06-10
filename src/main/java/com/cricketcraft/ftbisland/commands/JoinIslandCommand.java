@@ -1,7 +1,5 @@
 package com.cricketcraft.ftbisland.commands;
 
-import com.cricketcraft.ftbisland.IslandUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +10,10 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 
+import com.cricketcraft.ftbisland.IslandUtils;
+
 public class JoinIslandCommand extends CommandBase implements ICommand {
+
     private List<String> aliases;
 
     public JoinIslandCommand() {
@@ -40,15 +41,15 @@ public class JoinIslandCommand extends CommandBase implements ICommand {
     public String getCommandUsage(ICommandSender sender) {
         return "island_join <IslandName>";
     }
-    
+
     @Override
     public List addTabCompletionOptions(ICommandSender sender, String[] input) {
-        return input.length == 1 ? getListOfStringsMatchingLastWord(input, getPlayers())
-                : null;
+        return input.length == 1 ? getListOfStringsMatchingLastWord(input, getPlayers()) : null;
     }
 
     protected String[] getPlayers() {
-        return MinecraftServer.getServer().getAllUsernames();
+        return MinecraftServer.getServer()
+            .getAllUsernames();
     }
 
     @Override

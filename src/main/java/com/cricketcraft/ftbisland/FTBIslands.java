@@ -1,19 +1,5 @@
 package com.cricketcraft.ftbisland;
 
-import com.cricketcraft.ftbisland.commands.CreateIslandsCommand;
-import com.cricketcraft.ftbisland.commands.DeleteIslandCommand;
-import com.cricketcraft.ftbisland.commands.JoinIslandCommand;
-import com.cricketcraft.ftbisland.commands.ListIslandsCommand;
-import com.cricketcraft.ftbisland.commands.RenameIslandCommand;
-import com.cricketcraft.ftbisland.commands.SaveIslandsCommand;
-import com.cricketcraft.ftbisland.commands.SetIslandSpawnCommand;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +10,23 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.minecraftforge.common.config.Configuration;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.cricketcraft.ftbisland.commands.CreateIslandsCommand;
+import com.cricketcraft.ftbisland.commands.DeleteIslandCommand;
+import com.cricketcraft.ftbisland.commands.JoinIslandCommand;
+import com.cricketcraft.ftbisland.commands.ListIslandsCommand;
+import com.cricketcraft.ftbisland.commands.RenameIslandCommand;
+import com.cricketcraft.ftbisland.commands.SaveIslandsCommand;
+import com.cricketcraft.ftbisland.commands.SetIslandSpawnCommand;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -31,13 +34,14 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
-import net.minecraftforge.common.config.Configuration;
-
-@Mod(modid = FTBIslands.MODID, name = FTBIslands.NAME, version = FTBIslands.VERSION, dependencies = "required-after:FTBU", acceptableRemoteVersions = "*")
+@Mod(
+    modid = Tags.MODID,
+    name = Tags.MODNAME,
+    version = Tags.VERSION,
+    dependencies = "required-after:FTBU",
+    acceptableRemoteVersions = "*")
 public class FTBIslands {
-    public static final String MODID = "FTBI";
-    public static final String NAME = "FTB Islands";
-    public static final String VERSION = "1.3.2";
+
     public static int maxIslands;
     public static File islands;
     public static Logger logger;
@@ -125,18 +129,22 @@ public class FTBIslands {
     }
 
     public static void saveIslands(HashMap<String, IslandCreator.IslandPos> map) throws IOException {
-        String s = new GsonBuilder().create().toJson(map);
+        String s = new GsonBuilder().create()
+            .toJson(map);
         FileUtils.writeStringToFile(islands, s);
     }
 
     public static HashMap<String, IslandCreator.IslandPos> getIslands() throws IOException {
         FileInputStream stream = new FileInputStream(islands);
-        HashMap<String, IslandCreator.IslandPos> map = new Gson().fromJson(FileUtils.readFileToString(islands), new TypeToken<HashMap<String, IslandCreator.IslandPos>>(){}.getType());
+        HashMap<String, IslandCreator.IslandPos> map = new Gson().fromJson(
+            FileUtils.readFileToString(islands),
+            new TypeToken<HashMap<String, IslandCreator.IslandPos>>() {}.getType());
         stream.close();
         return map;
     }
 
     private static class Config {
+
         private static Configuration config;
 
         public static void init(File file) {
@@ -147,27 +155,44 @@ public class FTBIslands {
         }
 
         private static void loadConfig() {
-            FTBIslands.maxIslands = config.getInt("Max Islands", "misc", 100, 1, 1000, "The maximum amount of islands that can be created. This number will be multiplied by four." +
-                    " Be careful with high numbers.");
+            FTBIslands.maxIslands = config.getInt(
+                "Max Islands",
+                "misc",
+                100,
+                1,
+                1000,
+                "The maximum amount of islands that can be created. This number will be multiplied by four."
+                    + " Be careful with high numbers.");
             if (!config.hasKey("misc", "Island Type")) {
-                boolean skyFactory = config.getBoolean("Sky Factory", "misc", false, "Set this to true if you are playing on Sky Factory.");
-                boolean platform = config.getBoolean("Platform", "misc", false, "Set to true if you want to start on a 3x3 platform, or false for a tree.");
+                boolean skyFactory = config
+                    .getBoolean("Sky Factory", "misc", false, "Set this to true if you are playing on Sky Factory.");
+                boolean platform = config.getBoolean(
+                    "Platform",
+                    "misc",
+                    false,
+                    "Set to true if you want to start on a 3x3 platform, or false for a tree.");
                 if (skyFactory || !platform) {
-                    FTBIslands.islandType = config.getString("Island Type", "misc", "tree", "Set this to the type of platform you want:\n" +
-                            "  'grass'     A single grass block.\n" +
-                            "  'tree'      A small oak tree on a grass block. This is the standard start.\n" +
-                            "  'platform'  A 3x3 platform with a chest.\n" +
-                            "  'GoG'       An island similar to Garden of Glass from Botania.\n");
+                    FTBIslands.islandType = config.getString(
+                        "Island Type",
+                        "misc",
+                        "tree",
+                        "Set this to the type of platform you want:\n" + "  'grass'     A single grass block.\n"
+                            + "  'tree'      A small oak tree on a grass block. This is the standard start.\n"
+                            + "  'platform'  A 3x3 platform with a chest.\n"
+                            + "  'GoG'       An island similar to Garden of Glass from Botania.\n");
                     config.moveProperty("misc", "Sky Factory", "forRemoval");
                     config.moveProperty("misc", "Platform", "forRemoval");
                     config.removeCategory(config.getCategory("forRemoval"));
                 }
             } else {
-                FTBIslands.islandType = config.getString("Island Type", "misc", "tree", "Set this to the type of platform you want:\n" +
-                        "  'grass'     A single grass block.\n" +
-                        "  'tree'      A small oak tree on a grass block. This is the standard start.\n" +
-                        "  'platform'  A 3x3 platform with a chest.\n" +
-                        "  'GoG'       An island similar to Garden of Glass from Botania.\n");
+                FTBIslands.islandType = config.getString(
+                    "Island Type",
+                    "misc",
+                    "tree",
+                    "Set this to the type of platform you want:\n" + "  'grass'     A single grass block.\n"
+                        + "  'tree'      A small oak tree on a grass block. This is the standard start.\n"
+                        + "  'platform'  A 3x3 platform with a chest.\n"
+                        + "  'GoG'       An island similar to Garden of Glass from Botania.\n");
                 ArrayList<String> types = new ArrayList<>();
                 types.add("grass");
                 types.add("tree");
@@ -194,7 +219,7 @@ public class FTBIslands {
 
         @SubscribeEvent
         public void onChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-            if (event.modID.equalsIgnoreCase(FTBIslands.MODID)) {
+            if (event.modID.equalsIgnoreCase(Tags.MODID)) {
                 loadConfig();
             }
         }
@@ -212,7 +237,8 @@ public class FTBIslands {
         HashMap<String, IslandCreator.IslandPos> map = (HashMap<String, IslandCreator.IslandPos>) in.readObject();
         in.close();
         fileIn.close();
-        String s = new GsonBuilder().create().toJson(map);
+        String s = new GsonBuilder().create()
+            .toJson(map);
 
         File newFile = new File(directory, "islands.json");
         FileOutputStream outputStream = new FileOutputStream(newFile);

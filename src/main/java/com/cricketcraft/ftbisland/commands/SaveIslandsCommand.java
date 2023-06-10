@@ -1,7 +1,5 @@
 package com.cricketcraft.ftbisland.commands;
 
-import com.cricketcraft.ftbisland.FTBIslands;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +8,10 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 
+import com.cricketcraft.ftbisland.FTBIslands;
+
 public class SaveIslandsCommand extends CommandBase implements ICommand {
+
     private List<String> aliases;
 
     public SaveIslandsCommand() {

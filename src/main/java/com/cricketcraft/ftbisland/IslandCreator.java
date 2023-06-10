@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.registry.GameRegistry;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -17,10 +14,13 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
-
 import net.minecraftforge.common.util.ForgeDirection;
 
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.registry.GameRegistry;
+
 public class IslandCreator {
+
     public static HashMap<String, IslandPos> islandLocations = new HashMap<String, IslandPos>();
     private static final Item chickenStick = GameRegistry.findItem("excompressum", "chickenStick");
     public final String playerName;
@@ -69,7 +69,8 @@ public class IslandCreator {
                 world.setBlock(x, y + 1, z, Blocks.standing_sign, 6, 3);
                 ((TileEntitySign) world.getTileEntity(x, y + 1, z)).signText[0] = "You get it yet?";
             } else if (FTBIslands.islandType.equalsIgnoreCase("GoG")) {
-                // This is similar to how Botania itself generates an island in GoG. This is being done to avoid a soft dependency.
+                // This is similar to how Botania itself generates an island in GoG. This is being done to avoid a soft
+                // dependency.
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 4; j++) {
                         for (int k = 0; k < 3; k++) {
@@ -78,23 +79,9 @@ public class IslandCreator {
                     }
                 }
                 world.setBlock(x - 1, y - 1, z, Blocks.flowing_water);
-                int[][] roots = new int[][]{
-                        {-1, -2, -1},
-                        {-1, -4, -2},
-                        {-2, -3, -1},
-                        {-2, -3, -2},
-                        {1, -3, -1},
-                        {1, -4, -1},
-                        {2, -4, -1},
-                        {2, -4, 0},
-                        {3, -5, 0},
-                        {0, -2, 1},
-                        {0, -3, 2},
-                        {0, -4, 3},
-                        {1, -4, 3},
-                        {1, -5, 2},
-                        {1, -2, 0},
-                };
+                int[][] roots = new int[][] { { -1, -2, -1 }, { -1, -4, -2 }, { -2, -3, -1 }, { -2, -3, -2 },
+                    { 1, -3, -1 }, { 1, -4, -1 }, { 2, -4, -1 }, { 2, -4, 0 }, { 3, -5, 0 }, { 0, -2, 1 }, { 0, -3, 2 },
+                    { 0, -4, 3 }, { 1, -4, 3 }, { 1, -5, 2 }, { 1, -2, 0 }, };
                 if (Loader.isModLoaded("Botania")) {
                     world.setBlock(x + 1, y + 3, z + 1, GameRegistry.findBlock("Botania", "manaFlame"));
                     world.setBlock(x, y - 3, z, Blocks.bedrock);
@@ -114,7 +101,8 @@ public class IslandCreator {
                 }
 
                 world.setBlock(x + 2, y + 1, z + 1, Blocks.chest);
-                world.getBlock(x + 2, y + 1, z + 1).rotateBlock(world, x + 2, y + 1, z + 1, ForgeDirection.WEST);
+                world.getBlock(x + 2, y + 1, z + 1)
+                    .rotateBlock(world, x + 2, y + 1, z + 1, ForgeDirection.WEST);
                 TileEntityChest chest = (TileEntityChest) world.getTileEntity(x + 2, y + 1, z + 1);
 
                 chest.setInventorySlotContents(0, new ItemStack(Blocks.flowing_water, 1));
@@ -145,7 +133,8 @@ public class IslandCreator {
                 e.printStackTrace();
             }
             if (player != null) {
-                player.addChatMessage(new ChatComponentText(String.format("Created island named %s at %d, %d, %d", playerName, x, y, z)));
+                player.addChatMessage(
+                    new ChatComponentText(String.format("Created island named %s at %d, %d, %d", playerName, x, y, z)));
             } else {
                 FTBIslands.logger.info(String.format("Created island named %s at %d %d %d", playerName, x, y, z));
             }
@@ -174,6 +163,7 @@ public class IslandCreator {
     }
 
     public static class IslandPos implements Serializable {
+
         private int x;
         private int y;
         private int z;

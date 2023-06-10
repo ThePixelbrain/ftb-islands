@@ -6,6 +6,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 
 public class IslandUtils {
+
     public static boolean createIsland(World world, String playerName, EntityPlayer player) {
         IslandCreator.reloadIslands();
         if (IslandCreator.islandLocations == null) {
@@ -13,7 +14,8 @@ public class IslandUtils {
             return false;
         }
         IslandCreator.IslandPos pos = FTBIslands.islandLoc.get(IslandCreator.islandLocations.size() + 1);
-        IslandCreator.spawnIslandAt(world, pos.getX(), pos.getY(), pos.getZ(), playerName, (player != null ? player : null));
+        IslandCreator
+            .spawnIslandAt(world, pos.getX(), pos.getY(), pos.getZ(), playerName, (player != null ? player : null));
         return true;
     }
 
@@ -54,8 +56,8 @@ public class IslandUtils {
                 if (player instanceof EntityPlayerMP) {
                     EntityPlayerMP playerMP = (EntityPlayerMP) player;
                     playerMP.setPositionAndUpdate(x + xAndZ, y + height, z + xAndZ);
-                    //ChunkCoordinates chunk = new ChunkCoordinates(x, y, z);
-                    //playerMP.setSpawnChunk(chunk, true);
+                    // ChunkCoordinates chunk = new ChunkCoordinates(x, y, z);
+                    // playerMP.setSpawnChunk(chunk, true);
                 }
             } else {
                 player.addChatComponentMessage(new ChatComponentText("Island does not exist!"));

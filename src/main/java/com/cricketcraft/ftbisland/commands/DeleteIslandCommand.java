@@ -1,8 +1,5 @@
 package com.cricketcraft.ftbisland.commands;
 
-import com.cricketcraft.ftbisland.FTBIslands;
-import com.cricketcraft.ftbisland.IslandUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +10,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 
+import com.cricketcraft.ftbisland.FTBIslands;
+import com.cricketcraft.ftbisland.IslandUtils;
+
 public class DeleteIslandCommand extends CommandBase implements ICommand {
+
     private List<String> aliases;
 
     public DeleteIslandCommand() {
@@ -44,7 +45,8 @@ public class DeleteIslandCommand extends CommandBase implements ICommand {
         boolean exists = player != null;
         IslandUtils.deleteIsland(input[0]);
         if (exists) {
-            player.addChatComponentMessage(new ChatComponentText(String.format("Successfully deleted island %s", input[0])));
+            player.addChatComponentMessage(
+                new ChatComponentText(String.format("Successfully deleted island %s", input[0])));
         } else {
             FTBIslands.logger.info(String.format("Successfully deleted island %s", input[0]));
         }

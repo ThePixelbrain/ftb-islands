@@ -1,8 +1,5 @@
 package com.cricketcraft.ftbisland.commands;
 
-import com.cricketcraft.ftbisland.FTBIslands;
-import com.cricketcraft.ftbisland.IslandCreator;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +11,11 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentText;
 
+import com.cricketcraft.ftbisland.FTBIslands;
+import com.cricketcraft.ftbisland.IslandCreator;
+
 public class ListIslandsCommand extends CommandBase implements ICommand {
+
     private List<String> aliases;
 
     public ListIslandsCommand() {
@@ -37,11 +38,12 @@ public class ListIslandsCommand extends CommandBase implements ICommand {
     public void processCommand(ICommandSender sender, String[] input) {
         final EntityPlayerMP player = getCommandSenderAsPlayer(sender);
         try {
-            for (Map.Entry<String, IslandCreator.IslandPos> entry : FTBIslands.getIslands().entrySet()) {
+            for (Map.Entry<String, IslandCreator.IslandPos> entry : FTBIslands.getIslands()
+                .entrySet()) {
                 String key = entry.getKey();
                 player.addChatComponentMessage(new ChatComponentText(key));
             }
-            //FTBIslands.getIslands().forEach((k, v) -> player.addChatComponentMessage(new ChatComponentText(k)));
+            // FTBIslands.getIslands().forEach((k, v) -> player.addChatComponentMessage(new ChatComponentText(k)));
         } catch (IOException e) {
             e.printStackTrace();
         }
