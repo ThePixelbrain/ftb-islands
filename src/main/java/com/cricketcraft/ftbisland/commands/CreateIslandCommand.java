@@ -10,10 +10,10 @@ import com.cricketcraft.ftbisland.IslandUtils;
 import ftb.lib.api.cmd.CommandLM;
 import ftb.lib.api.cmd.CommandLevel;
 
-public class DeleteIslandCommand extends CommandLM {
+public class CreateIslandCommand extends CommandLM {
 
-    public DeleteIslandCommand() {
-        super("island_delete", CommandLevel.OP);
+    public CreateIslandCommand() {
+        super("island_create", CommandLevel.OP);
     }
 
     @Override
@@ -22,21 +22,15 @@ public class DeleteIslandCommand extends CommandLM {
     }
 
     @Override
-    public String[] getTabStrings(ICommandSender ics, String[] args, int i) throws CommandException {
-        return i == 0 ? FTBIslands.getIslands()
-            .keySet()
-            .toArray(new String[0]) : null;
-    }
-
-    @Override
     public IChatComponent onCommand(ICommandSender iCommandSender, String[] strings) throws CommandException {
         checkArgs(strings, 1);
         FTBIslands.reloadIslands();
-        if (!FTBIslands.getIslands()
+        if (FTBIslands.getIslands()
             .containsKey(strings[0])) {
-            return error(FTBIslands.mod.chatComponent("cmd.delete_not_exist", strings[0]));
+            return error(FTBIslands.mod.chatComponent("cmd.create_exists", strings[0]));
         }
-        IslandUtils.deleteIsland(strings[0]);
-        return FTBIslands.mod.chatComponent("cmd.delete_success", strings[0]);
+        boolean success = IslandUtils.createIsland(iCommandSender.getEntityWorld(), strings[0]);
+        return success ? FTBIslands.mod.chatComponent("cmd.create_success", strings[0])
+            : error(FTBIslands.mod.chatComponent("cmd.create_fail", strings[0]));
     }
 }

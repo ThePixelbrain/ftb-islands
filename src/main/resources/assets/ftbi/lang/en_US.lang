@@ -1,0 +1,12 @@
+ftbi.cmd.tp_island=Teleported to island %s
+ftbi.cmd.create_exists=Couldn't create island %s, as it already exists
+ftbi.cmd.create_success=Island %s successfully created
+ftbi.cmd.create_fail=Failed to create island %s
+ftbi.cmd.delete_not_exist=Couldn't delete island %s, as it doesn't exist
+ftbi.cmd.delete_success=Island %s successfully deleted
+ftbi.cmd.join_success=Joined island %s successfully
+ftbi.cmd.rename_new_exists=Couldn't rename island to %s, as it already exists
+ftbi.cmd.rename_old_not_exist=Couldn't rename island %s, as it doesn't exist
+ftbi.cmd.rename_success=Island %s sucessfully renamed to %s
+ftbi.cmd.setspawn_not_exist=Couldn't set the spawn of island %s, as the island doesn't exist
+ftbi.cmd.setspawn_success=Sucessfully moved the spawn of island %s to %d %d %d

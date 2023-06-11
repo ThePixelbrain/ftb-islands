@@ -1,18 +1,14 @@
 package com.cricketcraft.ftbisland;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -21,7 +17,6 @@ import cpw.mods.fml.common.registry.GameRegistry;
 
 public class IslandCreator {
 
-    public static HashMap<String, IslandPos> islandLocations = new HashMap<String, IslandPos>();
     private static final Item chickenStick = GameRegistry.findItem("excompressum", "chickenStick");
     public final String playerName;
     public final IslandPos pos;
@@ -36,9 +31,10 @@ public class IslandCreator {
         this.pos = pos;
     }
 
-    public static boolean spawnIslandAt(World world, int x, int y, int z, String playerName, EntityPlayer player) {
-        reloadIslands();
-        if (!islandLocations.containsKey(playerName)) {
+    public static boolean spawnIslandAt(World world, int x, int y, int z, String islandName) {
+        FTBIslands.reloadIslands();
+        if (!FTBIslands.getIslands()
+            .containsKey(islandName)) {
             if (FTBIslands.islandType.equalsIgnoreCase("tree")) {
                 world.setBlock(x, y, z, Blocks.grass);
                 for (int c = -3; c < 2; c++) {
@@ -120,43 +116,36 @@ public class IslandCreator {
                 }
             }
 
-            if (islandLocations.size() != 0) {
-                islandLocations.put(playerName, FTBIslands.islandLoc.get(islandLocations.size() + 1));
+            if (FTBIslands.getIslands()
+                .size() != 0) {
+                FTBIslands.getIslands()
+                    .put(
+                        islandName,
+                        FTBIslands.islandLoc.get(
+                            FTBIslands.getIslands()
+                                .size() + 1));
             } else {
-                islandLocations.put(playerName, FTBIslands.islandLoc.get(1));
+                FTBIslands.getIslands()
+                    .put(islandName, FTBIslands.islandLoc.get(1));
             }
 
-            islandLocations.put(playerName, new IslandPos(x, y, z));
+            FTBIslands.getIslands()
+                .put(islandName, new IslandPos(x, y, z));
             try {
-                FTBIslands.saveIslands(islandLocations);
+                FTBIslands.saveIslands(FTBIslands.getIslands());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if (player != null) {
-                player.addChatMessage(
-                    new ChatComponentText(String.format("Created island named %s at %d, %d, %d", playerName, x, y, z)));
-            } else {
-                FTBIslands.logger.info(String.format("Created island named %s at %d %d %d", playerName, x, y, z));
-            }
+            FTBIslands.logger.info(String.format("Created island named %s at %d %d %d", islandName, x, y, z));
             return true;
         } else {
             return false;
         }
     }
 
-    protected static void reloadIslands() {
-        try {
-            islandLocations = FTBIslands.getIslands();
-        } catch (EOFException e) {
-            // silent catch
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     protected static void save() {
         try {
-            FTBIslands.saveIslands(islandLocations);
+            FTBIslands.saveIslands(FTBIslands.getIslands());
         } catch (IOException e) {
             e.printStackTrace();
         }

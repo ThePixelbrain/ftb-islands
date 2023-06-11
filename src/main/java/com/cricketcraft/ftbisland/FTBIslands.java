@@ -1,12 +1,6 @@
 package com.cricketcraft.ftbisland;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,13 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.cricketcraft.ftbisland.commands.CreateIslandsCommand;
-import com.cricketcraft.ftbisland.commands.DeleteIslandCommand;
-import com.cricketcraft.ftbisland.commands.JoinIslandCommand;
-import com.cricketcraft.ftbisland.commands.ListIslandsCommand;
-import com.cricketcraft.ftbisland.commands.RenameIslandCommand;
-import com.cricketcraft.ftbisland.commands.SaveIslandsCommand;
-import com.cricketcraft.ftbisland.commands.SetIslandSpawnCommand;
+import com.cricketcraft.ftbisland.commands.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -33,37 +21,44 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import ftb.lib.LMMod;
 
 @Mod(
     modid = Tags.MODID,
     name = Tags.MODNAME,
     version = Tags.VERSION,
-    dependencies = "required-after:FTBU",
+    dependencies = "required-after:FTBL",
     acceptableRemoteVersions = "*")
 public class FTBIslands {
 
     public static int maxIslands;
-    public static File islands;
+    public static File islandFile;
     public static Logger logger;
     public static String islandType;
+    public static LMMod mod;
     private static File oldIslands;
     private static File directory;
-
     public static ArrayList<IslandCreator.IslandPos> islandLoc = new ArrayList<IslandCreator.IslandPos>();
+    private static HashMap<String, IslandCreator.IslandPos> islands = new HashMap<>();
 
     @Mod.EventHandler
     public void serverLoading(FMLServerStartingEvent event) {
         logger.info("Registering commands.");
-        event.registerServerCommand(new CreateIslandsCommand());
+        event.registerServerCommand(new CreateIslandCommand());
         event.registerServerCommand(new DeleteIslandCommand());
         event.registerServerCommand(new JoinIslandCommand());
-        event.registerServerCommand(new ListIslandsCommand());
+        event.registerServerCommand(new ListIslandCommand());
         event.registerServerCommand(new RenameIslandCommand());
-        event.registerServerCommand(new SaveIslandsCommand());
         event.registerServerCommand(new SetIslandSpawnCommand());
+        event.registerServerCommand(new TeleportIslandCommand());
         logger.info("Finished registering commands.");
         loadIslands();
         loadChestLoot();
+        reloadIslands();
+    }
+
+    public static HashMap<String, IslandCreator.IslandPos> getIslands() {
+        return islands;
     }
 
     private void loadIslands() {
@@ -91,10 +86,11 @@ public class FTBIslands {
     public void preInit(FMLPreInitializationEvent event) {
         Config.init(new File(event.getModConfigurationDirectory(), "ftbi/FTB_Islands.cfg"));
         logger = LogManager.getLogger("FTBI");
+        mod = LMMod.create("FTBI");
         File dir = event.getModConfigurationDirectory();
         directory = new File(dir.getParentFile(), "local");
         oldIslands = new File(directory, "islands.ser");
-        islands = new File(directory, "islands.json");
+        islandFile = new File(directory, "islands.json");
         if (oldIslands.exists()) {
             logger.info("Islands.ser found, attempting conversion.");
             try {
@@ -107,7 +103,7 @@ public class FTBIslands {
         }
         try {
             directory.mkdirs();
-            islands.createNewFile();
+            islandFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,12 +111,12 @@ public class FTBIslands {
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(islands.getPath()));
+        BufferedReader br = new BufferedReader(new FileReader(islandFile.getPath()));
         if (br.readLine() == null) {
             logger.info("Islands file empty, placing a default value.");
-            IslandCreator.islandLocations.put("default", new IslandCreator.IslandPos(0, 60, 0));
+            FTBIslands.islands.put("default", new IslandCreator.IslandPos(0, 60, 0));
             try {
-                saveIslands(IslandCreator.islandLocations);
+                saveIslands(FTBIslands.islands);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -131,16 +127,26 @@ public class FTBIslands {
     public static void saveIslands(HashMap<String, IslandCreator.IslandPos> map) throws IOException {
         String s = new GsonBuilder().create()
             .toJson(map);
-        FileUtils.writeStringToFile(islands, s);
+        FileUtils.writeStringToFile(islandFile, s);
     }
 
-    public static HashMap<String, IslandCreator.IslandPos> getIslands() throws IOException {
-        FileInputStream stream = new FileInputStream(islands);
-        HashMap<String, IslandCreator.IslandPos> map = new Gson().fromJson(
-            FileUtils.readFileToString(islands),
-            new TypeToken<HashMap<String, IslandCreator.IslandPos>>() {}.getType());
-        stream.close();
-        return map;
+    public static void reloadIslands() {
+        try {
+            islands = FTBIslands.getIslandsFromFile();
+        } catch (EOFException e) {
+            // silent catch
+        } catch (IOException e) {
+            FTBIslands.logger.error("Couldn't get islands from save file");
+            e.printStackTrace();
+        }
+    }
+
+    private static HashMap<String, IslandCreator.IslandPos> getIslandsFromFile() throws IOException {
+        try (FileInputStream ignored = new FileInputStream(islandFile)) {
+            return new Gson().fromJson(
+                FileUtils.readFileToString(islandFile),
+                new TypeToken<HashMap<String, IslandCreator.IslandPos>>() {}.getType());
+        }
     }
 
     private static class Config {

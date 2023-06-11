@@ -1,70 +1,72 @@
 package com.cricketcraft.ftbisland.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommand;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 
+import com.cricketcraft.ftbisland.FTBIslands;
 import com.cricketcraft.ftbisland.IslandUtils;
 
-public class JoinIslandCommand extends CommandBase implements ICommand {
+import ftb.lib.api.cmd.CommandLM;
+import ftb.lib.api.cmd.CommandLevel;
 
-    private List<String> aliases;
+public class JoinIslandCommand extends CommandLM {
 
     public JoinIslandCommand() {
-        aliases = new ArrayList<String>();
-        aliases.add("island_join");
-        aliases.add("islands_join");
+        super("island_join", CommandLevel.ALL);
     }
 
     @Override
-    public List getCommandAliases() {
-        return aliases;
+    public String getCommandUsage(ICommandSender ics) {
+        return "/" + this.getCommandName() + " <IslandName>";
     }
 
     @Override
-    public String getCommandName() {
-        return aliases.get(0);
+    public String[] getTabStrings(ICommandSender ics, String[] args, int i) throws CommandException {
+        return i == 0 ? FTBIslands.getIslands()
+            .keySet()
+            .toArray(new String[0]) : null;
     }
 
     @Override
-    public int getRequiredPermissionLevel() {
-        return 2;
+    public IChatComponent onCommand(ICommandSender iCommandSender, String[] strings) throws CommandException {
+        checkArgs(strings, 1);
+        IslandUtils.joinIsland(strings[0], getCommandSenderAsPlayer(iCommandSender));
+        return FTBIslands.mod.chatComponent("cmd.join_success", strings[0]);
     }
-
-    @Override
-    public String getCommandUsage(ICommandSender sender) {
-        return "island_join <IslandName>";
-    }
-
-    @Override
-    public List addTabCompletionOptions(ICommandSender sender, String[] input) {
-        return input.length == 1 ? getListOfStringsMatchingLastWord(input, getPlayers()) : null;
-    }
-
-    protected String[] getPlayers() {
-        return MinecraftServer.getServer()
-            .getAllUsernames();
-    }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] input) {
-        EntityPlayerMP player = getPlayer(sender, input[0]);
-
-        if (input.length == 0) {
-            sender.addChatMessage(new ChatComponentText("Invalid arguments!"));
-        } else {
-            IslandUtils.joinIsland(input[0], player);
-        }
-    }
-
-    @Override
-    public boolean canCommandSenderUseCommand(ICommandSender p_71519_1_) {
-        return true;
-    }
+    //
+    // @Override
+    // public String getCommandName() {
+    // return "island_join";
+    // }
+    //
+    // @Override
+    // public String getCommandUsage(ICommandSender sender) {
+    // return "island_join <IslandName>";
+    // }
+    //
+    // @Override
+    // public List addTabCompletionOptions(ICommandSender sender, String[] input) {
+    // return input.length == 1 ? getListOfStringsMatchingLastWord(input, getPlayers()) : null;
+    // }
+    //
+    // protected String[] getPlayers() {
+    // return MinecraftServer.getServer()
+    // .getAllUsernames();
+    // }
+    //
+    // @Override
+    // public void processCommand(ICommandSender sender, String[] input) {
+    // if (input.length != 1) {
+    // sender.addChatMessage(new ChatComponentText("Invalid arguments!"));
+    // return;
+    // }
+    //
+    // IslandUtils.joinIsland(input[0], getCommandSenderAsPlayer(sender));
+    // }
+    //
+    // @Override
+    // public boolean canCommandSenderUseCommand(ICommandSender sender) {
+    // return true;
+    // }
 }
