@@ -1,6 +1,6 @@
 package com.cricketcraft.ftbisland;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -8,7 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import com.cricketcraft.ftbisland.model.Island;
 import com.cricketcraft.ftbisland.model.IslandContainer;
@@ -20,7 +19,8 @@ public class IslandCreator {
 
     private static final Item chickenStick = GameRegistry.findItem("excompressum", "chickenStick");
 
-    public static void spawnIslandAt(World world, int x, int y, int z, String islandName, EntityPlayer owner) {
+    public static void spawnIslandAt(int x, int y, int z, String islandName, EntityPlayerMP owner) {
+        World world = owner.worldObj;
         if (FTBIslands.islandType.equalsIgnoreCase("tree")) {
             world.setBlock(x, y, z, Blocks.grass);
             for (int c = -3; c < 2; c++) {
@@ -76,16 +76,17 @@ public class IslandCreator {
                 }
             }
         } else {
-            for (int c = 0; c < 3; c++) {
-                for (int d = 0; d < 3; d++) {
+            for (int c = -1; c < 2; c++) {
+                for (int d = -1; d < 2; d++) {
                     world.setBlock(x + c, y, z + d, Blocks.dirt);
                 }
             }
 
-            world.setBlock(x + 2, y + 1, z + 1, Blocks.chest);
-            world.getBlock(x + 2, y + 1, z + 1)
-                .rotateBlock(world, x + 2, y + 1, z + 1, ForgeDirection.WEST);
-            TileEntityChest chest = (TileEntityChest) world.getTileEntity(x + 2, y + 1, z + 1);
+            int chestX = x + 1;
+            int chestY = y + 1;
+            int chestZ = z;
+            world.setBlock(chestX, chestY, chestZ, Blocks.chest, 4, 3);
+            TileEntityChest chest = (TileEntityChest) world.getTileEntity(chestX, chestY, chestZ);
 
             chest.setInventorySlotContents(0, new ItemStack(Blocks.flowing_water, 1));
             chest.setInventorySlotContents(1, new ItemStack(Blocks.flowing_lava, 1));
@@ -105,13 +106,9 @@ public class IslandCreator {
         IslandContainer container = FTBIslands.getIslandStorage()
             .getContainer();
         int dim = owner.worldObj.provider.dimensionId;
+        int offsetY = FTBIslands.islandType.equalsIgnoreCase("tree") ? 7 : 1;
         container.getIslands()
-            .add(
-                new Island(
-                    islandName,
-                    owner.getGameProfile()
-                        .getId(),
-                    new Island.Position(x, y, z, dim)));
+            .add(new Island(islandName, owner.getUniqueID(), new Island.Position(x, y + offsetY, z, dim)));
         container.incrementIslandsCreated(dim);
         FTBIslands.getIslandStorage()
             .saveContainer();

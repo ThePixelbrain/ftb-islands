@@ -1,9 +1,6 @@
 package com.cricketcraft.ftbisland.model;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class IslandContainer {
 
@@ -29,7 +26,7 @@ public class IslandContainer {
         islandsCreated.merge(dim, 1, Integer::sum);
     }
 
-    public Optional<Island> getIslandByName(String name) {
+    public Optional<Island> getIsland(String name) {
         return this.islands.stream()
             .filter(
                 island -> island.getName()
@@ -38,7 +35,7 @@ public class IslandContainer {
     }
 
     public boolean doesIslandExist(String name) {
-        return this.getIslandByName(name)
+        return this.getIsland(name)
             .isPresent();
     }
 
@@ -50,7 +47,25 @@ public class IslandContainer {
             .count();
     }
 
-    public String[] getAllIslandNames() {
+    public Island[] getIslands(UUID owner) {
+        return this.islands.stream()
+            .filter(
+                island -> island.getOwner()
+                    .equals(owner))
+            .toArray(Island[]::new);
+    }
+
+    public String[] getIslandNames(UUID owner) {
+        Island[] ownerIslands = this.getIslands(owner);
+        if (ownerIslands.length == 0) {
+            return new String[0];
+        }
+        return Arrays.stream(ownerIslands)
+            .map(Island::getName)
+            .toArray(String[]::new);
+    }
+
+    public String[] getIslandNames() {
         return this.islands.stream()
             .map(Island::getName)
             .toArray(String[]::new);

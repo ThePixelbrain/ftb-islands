@@ -1,14 +1,14 @@
 package com.cricketcraft.ftbisland.commands;
 
-import java.util.Optional;
+import java.util.UUID;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 
 import com.cricketcraft.ftbisland.FTBIslands;
 import com.cricketcraft.ftbisland.IslandUtils;
-import com.cricketcraft.ftbisland.model.Island;
 
 import ftb.lib.api.cmd.CommandLM;
 import ftb.lib.api.cmd.CommandLevel;
@@ -16,7 +16,7 @@ import ftb.lib.api.cmd.CommandLevel;
 public class RenameIslandCommand extends CommandLM {
 
     public RenameIslandCommand() {
-        super("island_rename", CommandLevel.OP);
+        super("island_rename", CommandLevel.ALL);
     }
 
     @Override
@@ -26,28 +26,20 @@ public class RenameIslandCommand extends CommandLM {
 
     @Override
     public String[] getTabStrings(ICommandSender ics, String[] args, int i) throws CommandException {
+        UUID uuid = getCommandSenderAsPlayer(ics).getUniqueID();
         return i == 0 ? FTBIslands.getIslandStorage()
             .getContainer()
-            .getAllIslandNames() : null;
+            .getIslandNames(uuid) : null;
     }
 
     @Override
     public IChatComponent onCommand(ICommandSender iCommandSender, String[] strings) throws CommandException {
         checkArgs(strings, 2);
-        FTBIslands.getIslandStorage()
-            .reloadContainer();
-        Optional<Island> island = FTBIslands.getIslandStorage()
-            .getContainer()
-            .getIslandByName(strings[0]);
-        if (!island.isPresent()) {
-            return error(FTBIslands.mod.chatComponent("cmd.rename_old_not_exist", strings[0]));
+        UUID uuid = getCommandSenderAsPlayer(iCommandSender).getUniqueID();
+        IslandUtils.StatusCode status = IslandUtils.renameIsland(strings[0], strings[1], uuid, false);
+        if (status != IslandUtils.StatusCode.SUCCESS) {
+            return error(new ChatComponentText(status.getMessage()));
         }
-        if (FTBIslands.getIslandStorage()
-            .getContainer()
-            .doesIslandExist(strings[1])) {
-            return error(FTBIslands.mod.chatComponent("cmd.rename_new_exists", strings[1]));
-        }
-        IslandUtils.renameIsland(island.get(), strings[1]);
-        return FTBIslands.mod.chatComponent("cmd.rename_success", strings[0], strings[1]);
+        return new ChatComponentText(String.format("Successfully renamed %s to %s", strings[0], strings[1]));
     }
 }

@@ -6,6 +6,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.cricketcraft.ftbisland.commands.*;
+import com.cricketcraft.ftbisland.commands.admin.AdminCreateCommand;
+import com.cricketcraft.ftbisland.commands.admin.AdminDeleteCommand;
+import com.cricketcraft.ftbisland.commands.admin.AdminRenameCommand;
+import com.cricketcraft.ftbisland.commands.admin.AdminTeleportCommand;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -20,7 +24,6 @@ import ftb.lib.LMMod;
     acceptableRemoteVersions = "*")
 public class FTBIslands {
 
-    public static int maxIslands;
     public static Logger logger;
     public static String islandType;
     public static LMMod mod;
@@ -33,10 +36,13 @@ public class FTBIslands {
         logger.info("Registering commands.");
         event.registerServerCommand(new CreateIslandCommand());
         event.registerServerCommand(new DeleteIslandCommand());
-        event.registerServerCommand(new JoinIslandCommand());
+        event.registerServerCommand(new TeleportIslandCommand());
         event.registerServerCommand(new ListIslandCommand());
         event.registerServerCommand(new RenameIslandCommand());
-        event.registerServerCommand(new TeleportIslandCommand());
+        event.registerServerCommand(new AdminCreateCommand());
+        event.registerServerCommand(new AdminDeleteCommand());
+        event.registerServerCommand(new AdminRenameCommand());
+        event.registerServerCommand(new AdminTeleportCommand());
         logger.info("Finished registering commands.");
         islandStorage.reloadContainer();
     }

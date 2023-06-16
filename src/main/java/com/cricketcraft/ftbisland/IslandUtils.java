@@ -2,10 +2,7 @@ package com.cricketcraft.ftbisland;
 
 import java.util.*;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.world.World;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -13,63 +10,118 @@ import com.cricketcraft.ftbisland.model.Island;
 
 public class IslandUtils {
 
-    public static void createIsland(World world, String islandName, EntityPlayer owner) {
+    public enum StatusCode {
+
+        SUCCESS("Success!"),
+        FAIL_EXIST("Island %s already exists!"),
+        FAIL_NOT_EXIST("Island %s doesn't exist!"),
+        FAIL_MAX_ISLANDS("A player can only have %d island(s)!"),
+        FAIL_WRONG_OWNER("Island %s is owned by a different player!");
+
+        private final String message;
+        private Object[] args;
+
+        StatusCode(String message) {
+            this.message = message;
+        }
+
+        public StatusCode setArgs(Object... args) {
+            this.args = args;
+            return this;
+        }
+
+        public String getMessage() {
+            return String.format(message, args);
+        }
+    }
+
+    public static StatusCode createIsland(String islandName, EntityPlayerMP owner, boolean adminSender) {
         FTBIslands.getIslandStorage()
             .reloadContainer();
+        if (FTBIslands.getIslandStorage()
+            .getContainer()
+            .doesIslandExist(islandName)) {
+            return StatusCode.FAIL_EXIST.setArgs(islandName);
+        }
+        if (!adminSender && FTBIslands.getIslandStorage()
+            .getContainer()
+            .islandsOwnedByUser(owner.getUniqueID()) >= Config.maxIslandsPerPlayer) {
+            return StatusCode.FAIL_MAX_ISLANDS.setArgs(Config.maxIslandsPerPlayer);
+        }
         Pair<Integer, Integer> spiralLoc = calculateSpiral(
             FTBIslands.getIslandStorage()
                 .getContainer()
                 .getIslandsCreated(owner.worldObj.provider.dimensionId));
-        IslandCreator.spawnIslandAt(
-            world,
-            spiralLoc.getLeft() * 512 + 256,
-            64,
-            spiralLoc.getRight() * 512 + 256,
-            islandName,
-            owner);
+        IslandCreator
+            .spawnIslandAt(spiralLoc.getLeft() * 512 + 256, 64, spiralLoc.getRight() * 512 + 256, islandName, owner);
+        return StatusCode.SUCCESS;
     }
 
-    public static void renameIsland(Island island, String newName) {
-        island.setName(newName);
-        FTBIslands.getIslandStorage()
-            .saveContainer();
-    }
-
-    public static void joinIsland(String islandName, EntityPlayer player) {
+    public static StatusCode renameIsland(String oldName, String newName, UUID owner, boolean adminSender) {
         FTBIslands.getIslandStorage()
             .reloadContainer();
         Optional<Island> island = FTBIslands.getIslandStorage()
             .getContainer()
-            .getIslandByName(islandName);
-        if (island.isPresent()) {
-            Island.Position pos = island.get()
-                .getPos();
-            if (player.dimension != pos.getDim()) {
-                player.travelToDimension(pos.getDim());
-            }
-            int x = pos.getX();
-            int y = pos.getY();
-            int z = pos.getZ();
-            int height = FTBIslands.islandType.equalsIgnoreCase("tree") ? 6 : 2;
-            double xAndZ = FTBIslands.islandType.equalsIgnoreCase("grass") ? 0.5 : 1.5;
-            if (player instanceof EntityPlayerMP) {
-                EntityPlayerMP playerMP = (EntityPlayerMP) player;
-                playerMP.setPositionAndUpdate(x + xAndZ, y + height, z + xAndZ);
-                // ChunkCoordinates chunk = new ChunkCoordinates(x, y, z);
-                // playerMP.setSpawnChunk(chunk, true);
-            }
-        } else {
-            player.addChatComponentMessage(new ChatComponentText("Island does not exist!"));
+            .getIsland(oldName);
+        if (island.isEmpty()) {
+            return StatusCode.FAIL_NOT_EXIST.setArgs(oldName);
         }
+        if (!adminSender && !island.get()
+            .getOwner()
+            .equals(owner)) {
+            return StatusCode.FAIL_WRONG_OWNER.setArgs(oldName);
+        }
+        if (FTBIslands.getIslandStorage()
+            .getContainer()
+            .doesIslandExist(newName)) {
+            return StatusCode.FAIL_EXIST.setArgs(newName);
+        }
+        island.get()
+            .setName(newName);
+        FTBIslands.getIslandStorage()
+            .saveContainer();
+        return StatusCode.SUCCESS;
     }
 
-    public static void deleteIsland(Island island) {
+    public static StatusCode teleportToIsland(String islandName, EntityPlayerMP player) {
+        FTBIslands.getIslandStorage()
+            .reloadContainer();
+        Optional<Island> island = FTBIslands.getIslandStorage()
+            .getContainer()
+            .getIsland(islandName);
+        if (island.isEmpty()) {
+            return StatusCode.FAIL_NOT_EXIST.setArgs(islandName);
+        }
+        Island.Position pos = island.get()
+            .getPos();
+        if (player.dimension != pos.getDim()) {
+            player.travelToDimension(pos.getDim());
+        }
+        player.setPositionAndUpdate(pos.getX() + .5, pos.getY(), pos.getZ() + .5);
+        return StatusCode.SUCCESS;
+    }
+
+    public static StatusCode deleteIsland(String islandName, UUID owner, boolean adminSender) {
+        FTBIslands.getIslandStorage()
+            .reloadContainer();
+        Optional<Island> island = FTBIslands.getIslandStorage()
+            .getContainer()
+            .getIsland(islandName);
+        if (island.isEmpty()) {
+            return StatusCode.FAIL_NOT_EXIST.setArgs(islandName);
+        }
+        if (!adminSender && !island.get()
+            .getOwner()
+            .equals(owner)) {
+            return StatusCode.FAIL_WRONG_OWNER.setArgs(islandName);
+        }
         FTBIslands.getIslandStorage()
             .getContainer()
             .getIslands()
-            .remove(island);
+            .remove(island.get());
         FTBIslands.getIslandStorage()
             .saveContainer();
+        return StatusCode.SUCCESS;
     }
 
     private static Pair<Integer, Integer> calculateSpiral(int index) {

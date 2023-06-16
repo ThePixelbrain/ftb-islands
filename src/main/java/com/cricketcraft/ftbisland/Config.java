@@ -11,6 +11,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 public class Config {
 
     private static Configuration config;
+    public static int maxIslandsPerPlayer = 1;
 
     public static void init(File file) {
         if (config == null) {
@@ -20,14 +21,6 @@ public class Config {
     }
 
     private static void loadConfig() {
-        FTBIslands.maxIslands = config.getInt(
-            "Max Islands",
-            "misc",
-            100,
-            1,
-            1000,
-            "The maximum amount of islands that can be created. This number will be multiplied by four."
-                + " Be careful with high numbers.");
         if (!config.hasKey("misc", "Island Type")) {
             boolean skyFactory = config
                 .getBoolean("Sky Factory", "misc", false, "Set this to true if you are playing on Sky Factory.");
@@ -76,6 +69,14 @@ public class Config {
                 FTBIslands.islandType = "platform";
             }
         }
+
+        maxIslandsPerPlayer = config.getInt(
+            "Max Islands Per Player",
+            "misc",
+            maxIslandsPerPlayer,
+            0,
+            1000,
+            "Maximum amount of islands a player can own");
 
         if (config.hasChanged()) {
             config.save();
