@@ -63,7 +63,7 @@ public class IslandUtils {
         Optional<Island> island = FTBIslands.getIslandStorage()
             .getContainer()
             .getIsland(oldName);
-        if (island.isEmpty()) {
+        if (!island.isPresent()) {
             return StatusCode.FAIL_NOT_EXIST.setArgs(oldName);
         }
         if (!adminSender && !island.get()
@@ -89,7 +89,7 @@ public class IslandUtils {
         Optional<Island> island = FTBIslands.getIslandStorage()
             .getContainer()
             .getIsland(islandName);
-        if (island.isEmpty()) {
+        if (!island.isPresent()) {
             return StatusCode.FAIL_NOT_EXIST.setArgs(islandName);
         }
         Island.Position pos = island.get()
@@ -107,7 +107,7 @@ public class IslandUtils {
         Optional<Island> island = FTBIslands.getIslandStorage()
             .getContainer()
             .getIsland(islandName);
-        if (island.isEmpty()) {
+        if (!island.isPresent()) {
             return StatusCode.FAIL_NOT_EXIST.setArgs(islandName);
         }
         if (!adminSender && !island.get()
