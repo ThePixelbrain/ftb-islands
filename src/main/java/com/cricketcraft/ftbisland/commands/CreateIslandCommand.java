@@ -24,13 +24,14 @@ public class CreateIslandCommand extends CommandLM {
     @Override
     public IChatComponent onCommand(ICommandSender iCommandSender, String[] strings) throws CommandException {
         checkArgs(strings, 1);
-        FTBIslands.reloadIslands();
-        if (FTBIslands.getIslands()
-            .containsKey(strings[0])) {
+        FTBIslands.getIslandStorage()
+            .reloadContainer();
+        if (FTBIslands.getIslandStorage()
+            .getContainer()
+            .doesIslandExist(strings[0])) {
             return error(FTBIslands.mod.chatComponent("cmd.create_exists", strings[0]));
         }
-        boolean success = IslandUtils.createIsland(iCommandSender.getEntityWorld(), strings[0]);
-        return success ? FTBIslands.mod.chatComponent("cmd.create_success", strings[0])
-            : error(FTBIslands.mod.chatComponent("cmd.create_fail", strings[0]));
+        IslandUtils.createIsland(iCommandSender.getEntityWorld(), strings[0], getCommandSenderAsPlayer(iCommandSender));
+        return FTBIslands.mod.chatComponent("cmd.create_success", strings[0]);
     }
 }

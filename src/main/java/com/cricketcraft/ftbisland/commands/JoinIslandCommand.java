@@ -23,9 +23,9 @@ public class JoinIslandCommand extends CommandLM {
 
     @Override
     public String[] getTabStrings(ICommandSender ics, String[] args, int i) throws CommandException {
-        return i == 0 ? FTBIslands.getIslands()
-            .keySet()
-            .toArray(new String[0]) : null;
+        return i == 0 ? FTBIslands.getIslandStorage()
+            .getContainer()
+            .getAllIslandNames() : null;
     }
 
     @Override
@@ -34,39 +34,4 @@ public class JoinIslandCommand extends CommandLM {
         IslandUtils.joinIsland(strings[0], getCommandSenderAsPlayer(iCommandSender));
         return FTBIslands.mod.chatComponent("cmd.join_success", strings[0]);
     }
-    //
-    // @Override
-    // public String getCommandName() {
-    // return "island_join";
-    // }
-    //
-    // @Override
-    // public String getCommandUsage(ICommandSender sender) {
-    // return "island_join <IslandName>";
-    // }
-    //
-    // @Override
-    // public List addTabCompletionOptions(ICommandSender sender, String[] input) {
-    // return input.length == 1 ? getListOfStringsMatchingLastWord(input, getPlayers()) : null;
-    // }
-    //
-    // protected String[] getPlayers() {
-    // return MinecraftServer.getServer()
-    // .getAllUsernames();
-    // }
-    //
-    // @Override
-    // public void processCommand(ICommandSender sender, String[] input) {
-    // if (input.length != 1) {
-    // sender.addChatMessage(new ChatComponentText("Invalid arguments!"));
-    // return;
-    // }
-    //
-    // IslandUtils.joinIsland(input[0], getCommandSenderAsPlayer(sender));
-    // }
-    //
-    // @Override
-    // public boolean canCommandSenderUseCommand(ICommandSender sender) {
-    // return true;
-    // }
 }

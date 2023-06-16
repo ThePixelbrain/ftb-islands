@@ -28,9 +28,9 @@ public class TeleportIslandCommand extends CommandLM {
 
     @Override
     public String[] getTabStrings(ICommandSender ics, String[] args, int i) throws CommandException {
-        return i == 0 ? FTBIslands.getIslands()
-            .keySet()
-            .toArray(new String[0]) : super.getTabStrings(ics, args, i);
+        return i == 0 ? FTBIslands.getIslandStorage()
+            .getContainer()
+            .getAllIslandNames() : super.getTabStrings(ics, args, i);
     }
 
     @Override

@@ -23,10 +23,13 @@ public class ListIslandCommand extends CommandLM {
 
     @Override
     public IChatComponent onCommand(ICommandSender iCommandSender, String[] strings) throws CommandException {
-        FTBIslands.reloadIslands();
-        FTBIslands.getIslands()
-            .keySet()
-            .forEach(key -> iCommandSender.addChatMessage(new ChatComponentText(key)));
+        FTBIslands.getIslandStorage()
+            .reloadContainer();
+        for (String name : FTBIslands.getIslandStorage()
+            .getContainer()
+            .getAllIslandNames()) {
+            iCommandSender.addChatMessage(new ChatComponentText(name));
+        }
         return null;
     }
 }
