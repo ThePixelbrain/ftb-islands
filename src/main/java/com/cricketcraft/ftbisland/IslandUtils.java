@@ -6,9 +6,12 @@ import net.minecraft.entity.player.EntityPlayerMP;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.cricketcraft.ftbisland.model.Cooldown;
 import com.cricketcraft.ftbisland.model.Island;
 
 public class IslandUtils {
+
+    private static final Map<UUID, Cooldown> deletionCooldown = new HashMap<>();
 
     public enum StatusCode {
 
@@ -16,7 +19,8 @@ public class IslandUtils {
         FAIL_EXIST("Island %s already exists!"),
         FAIL_NOT_EXIST("Island %s doesn't exist!"),
         FAIL_MAX_ISLANDS("A player can only have %d island(s)!"),
-        FAIL_WRONG_OWNER("Island %s is owned by a different player!");
+        FAIL_WRONG_OWNER("Island %s is owned by a different player!"),
+        FAIL_COOLDOWN("You have to wait %d minutes until you can execute this action again!");
 
         private final String message;
         private Object[] args;
@@ -101,7 +105,7 @@ public class IslandUtils {
         return StatusCode.SUCCESS;
     }
 
-    public static StatusCode deleteIsland(String islandName, UUID owner, boolean adminSender) {
+    public static StatusCode deleteIslandAdmin(String islandName) {
         FTBIslands.getIslandStorage()
             .reloadContainer();
         Optional<Island> island = FTBIslands.getIslandStorage()
@@ -110,10 +114,38 @@ public class IslandUtils {
         if (!island.isPresent()) {
             return StatusCode.FAIL_NOT_EXIST.setArgs(islandName);
         }
-        if (!adminSender && !island.get()
+
+        FTBIslands.getIslandStorage()
+            .getContainer()
+            .getIslands()
+            .remove(island.get());
+        FTBIslands.getIslandStorage()
+            .saveContainer();
+
+        return StatusCode.SUCCESS;
+    }
+
+    public static StatusCode deleteIsland(String islandName, UUID owner) {
+        FTBIslands.getIslandStorage()
+            .reloadContainer();
+        Optional<Island> island = FTBIslands.getIslandStorage()
+            .getContainer()
+            .getIsland(islandName);
+        if (!island.isPresent()) {
+            return StatusCode.FAIL_NOT_EXIST.setArgs(islandName);
+        }
+        if (!island.get()
             .getOwner()
             .equals(owner)) {
             return StatusCode.FAIL_WRONG_OWNER.setArgs(islandName);
+        }
+        Cooldown cooldown = deletionCooldown.get(owner);
+        if (cooldown == null) {
+            cooldown = new Cooldown(Config.maxIslandsPerPlayer, Config.islandDeletionCooldown * 60);
+            deletionCooldown.put(owner, cooldown);
+        }
+        if (cooldown.getCooldown() != 0) {
+            return StatusCode.FAIL_COOLDOWN.setArgs(cooldown.getCooldown() / 60);
         }
         FTBIslands.getIslandStorage()
             .getContainer()
@@ -121,6 +153,7 @@ public class IslandUtils {
             .remove(island.get());
         FTBIslands.getIslandStorage()
             .saveContainer();
+        cooldown.addAction();
         return StatusCode.SUCCESS;
     }
 
