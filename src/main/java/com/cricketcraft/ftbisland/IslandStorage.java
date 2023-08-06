@@ -13,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class IslandStorage {
 
+    public static final int currentFileFormatVersion = 2;
     private final File islandFile = new File(FTBIslands.getDirectory(), "islands.json");
     private IslandContainer container;
 
@@ -37,8 +38,10 @@ public class IslandStorage {
     public void reloadContainer() {
         try {
             IslandContainer containerFromFile = this.getContainerFromFile();
-            if (containerFromFile == null) containerFromFile = new IslandContainer(new ArrayList<>(), new HashMap<>());
+            if (containerFromFile == null)
+                containerFromFile = new IslandContainer(new ArrayList<>(), new HashMap<>(), currentFileFormatVersion);
             this.container = containerFromFile;
+            if (containerFromFile.updateIslandFromOldSave()) this.saveContainer();
         } catch (IOException e) {
             FTBIslands.logger.error("Couldn't get islands from save file");
             e.printStackTrace();
