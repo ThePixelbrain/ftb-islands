@@ -31,7 +31,7 @@ public class Cooldown {
      * @return Current cooldown or 0 if there is no cooldown
      */
     public int getCooldown() {
-        if (this.actions <= this.limit) {
+        if (this.actions < this.limit) {
             return 0;
         }
         int difference = (int) ((new Date().getTime() - this.lastAction.getTime()) / 1000);
