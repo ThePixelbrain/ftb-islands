@@ -6,13 +6,18 @@ public class Island {
 
     private String name;
     private final UUID owner;
-
     private final Position pos;
+    private Position tpPos;
 
-    public Island(String name, UUID owner, Position pos) {
+    public Island(String name, UUID owner, Position pos, Position tpPos) {
         this.name = name;
         this.owner = owner;
         this.pos = pos;
+        this.tpPos = tpPos;
+    }
+
+    public Island(String name, UUID owner, Position pos) {
+        this(name, owner, pos, pos);
     }
 
     public UUID getOwner() {
@@ -29,6 +34,14 @@ public class Island {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Position getTpPos() {
+        return tpPos;
+    }
+
+    public void setTpPos(Position tpPos) {
+        this.tpPos = tpPos;
     }
 
     public static class Position {

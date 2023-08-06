@@ -20,7 +20,9 @@ public class IslandUtils {
         FAIL_NOT_EXIST("Island %s doesn't exist!"),
         FAIL_MAX_ISLANDS("A player can only have %d island(s)!"),
         FAIL_WRONG_OWNER("Island %s is owned by a different player!"),
-        FAIL_COOLDOWN("You have to wait %d minutes until you can execute this action again!");
+        FAIL_COOLDOWN("You have to wait %d minutes until you can execute this action again!"),
+        FAIL_WRONG_DIMENSION("You are in the wrong dimension, you need to be in dimension %d!"),
+        FAIL_DISTANCE_EXCEEDED("You are too far away from the original island position!");
 
         private final String message;
         private Object[] args;
@@ -97,7 +99,7 @@ public class IslandUtils {
             return StatusCode.FAIL_NOT_EXIST.setArgs(islandName);
         }
         Island.Position pos = island.get()
-            .getPos();
+            .getTpPos();
         if (player.dimension != pos.getDim()) {
             player.travelToDimension(pos.getDim());
         }
@@ -154,6 +156,38 @@ public class IslandUtils {
         FTBIslands.getIslandStorage()
             .saveContainer();
         cooldown.addAction();
+        return StatusCode.SUCCESS;
+    }
+
+    public static StatusCode setIslandTpPos(String islandName, UUID owner, int x, int y, int z, Integer dimension,
+        boolean adminSender) {
+        FTBIslands.getIslandStorage()
+            .reloadContainer();
+        Optional<Island> island = FTBIslands.getIslandStorage()
+            .getContainer()
+            .getIsland(islandName);
+        if (!island.isPresent()) {
+            return StatusCode.FAIL_NOT_EXIST.setArgs(islandName);
+        }
+        if (!adminSender && !island.get()
+            .getOwner()
+            .equals(owner)) {
+            return StatusCode.FAIL_WRONG_OWNER.setArgs(islandName);
+        }
+        Island.Position originalPos = island.get()
+            .getPos();
+        if (dimension != null && dimension != originalPos.getDim()) {
+            return StatusCode.FAIL_WRONG_DIMENSION.setArgs(originalPos.getDim());
+        }
+        if (Math.abs(originalPos.getX() - x) >= 128 || Math.abs(originalPos.getZ() - z) >= 128) {
+            return StatusCode.FAIL_DISTANCE_EXCEEDED;
+        }
+
+        island.get()
+            .setTpPos(new Island.Position(x, y, z, originalPos.getDim()));
+        FTBIslands.getIslandStorage()
+            .saveContainer();
+
         return StatusCode.SUCCESS;
     }
 
