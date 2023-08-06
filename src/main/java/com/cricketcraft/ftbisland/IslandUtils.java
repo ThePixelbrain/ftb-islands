@@ -191,6 +191,28 @@ public class IslandUtils {
         return StatusCode.SUCCESS;
     }
 
+    public static StatusCode changeIslandOwner(String islandName, UUID newOwner, UUID cmdSender, boolean adminSender) {
+        FTBIslands.getIslandStorage()
+            .reloadContainer();
+        Optional<Island> island = FTBIslands.getIslandStorage()
+            .getContainer()
+            .getIsland(islandName);
+        if (!island.isPresent()) {
+            return StatusCode.FAIL_NOT_EXIST.setArgs(islandName);
+        }
+        if (!adminSender && !island.get()
+            .getOwner()
+            .equals(cmdSender)) {
+            return StatusCode.FAIL_WRONG_OWNER.setArgs(islandName);
+        }
+        island.get()
+            .setOwner(newOwner);
+        FTBIslands.getIslandStorage()
+            .saveContainer();
+
+        return StatusCode.SUCCESS;
+    }
+
     private static Pair<Integer, Integer> calculateSpiral(int index) {
         if (index == 0) {
             return Pair.of(0, 0);
