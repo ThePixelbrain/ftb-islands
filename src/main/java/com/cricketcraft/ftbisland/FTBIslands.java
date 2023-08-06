@@ -37,12 +37,14 @@ public class FTBIslands {
         event.registerServerCommand(new ListIslandCommand());
         event.registerServerCommand(new RenameIslandCommand());
         event.registerServerCommand(new SetSpawnIslandCommand());
+        event.registerServerCommand(new SetOwnerIslandCommand());
 
         event.registerServerCommand(new AdminCreateCommand());
         event.registerServerCommand(new AdminDeleteCommand());
         event.registerServerCommand(new AdminRenameCommand());
         event.registerServerCommand(new AdminTeleportCommand());
         event.registerServerCommand(new AdminSetSpawnCommand());
+        event.registerServerCommand(new AdminSetOwnerCommand());
 
         logger.info("Finished registering commands.");
         islandStorage.reloadContainer();

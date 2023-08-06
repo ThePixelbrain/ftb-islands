@@ -5,7 +5,7 @@ import java.util.UUID;
 public class Island {
 
     private String name;
-    private final UUID owner;
+    private UUID owner;
     private final Position pos;
     private Position tpPos;
 
@@ -22,6 +22,10 @@ public class Island {
 
     public UUID getOwner() {
         return owner;
+    }
+
+    public void setOwner(UUID owner) {
+        this.owner = owner;
     }
 
     public Position getPos() {
