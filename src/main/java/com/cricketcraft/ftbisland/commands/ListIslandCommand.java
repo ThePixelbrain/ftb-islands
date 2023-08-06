@@ -9,6 +9,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 
 import com.cricketcraft.ftbisland.FTBIslands;
+import com.mojang.authlib.GameProfile;
 
 import ftb.lib.api.cmd.CommandLM;
 import ftb.lib.api.cmd.CommandLevel;
@@ -35,10 +36,13 @@ public class ListIslandCommand extends CommandLM {
         if (strings.length == 0) {
             uuid = getCommandSenderAsPlayer(iCommandSender).getUniqueID();
         } else {
-            uuid = MinecraftServer.getServer()
+            // This method is needed to also find offline players
+            GameProfile profile = MinecraftServer.getServer()
                 .func_152358_ax()
-                .func_152655_a(strings[0])
-                .getId();
+                .func_152655_a(strings[0]);
+            if (profile == null)
+                return error(new ChatComponentText(String.format("Could not find username %s", strings[0])));
+            uuid = profile.getId();
         }
         FTBIslands.getIslandStorage()
             .reloadContainer();
