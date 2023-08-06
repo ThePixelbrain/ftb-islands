@@ -12,6 +12,7 @@ public class Config {
 
     private static Configuration config;
     public static int maxIslandsPerPlayer = 1;
+    public static int islandDeletionCooldown = 60;
 
     public static void init(File file) {
         if (config == null) {
@@ -77,6 +78,16 @@ public class Config {
             0,
             1000,
             "Maximum amount of islands a player can own");
+
+        islandDeletionCooldown = config.getInt(
+            "Cooldown between island deletions",
+            "misc",
+            islandDeletionCooldown,
+            0,
+            35000,
+            "Cooldown between island deletions for users in minutes."
+                + "\nA cooldown will only be applied after the user has deleted the total amount of islands they can create."
+                + "\nCooldowns are not persistent over restarts.");
 
         if (config.hasChanged()) {
             config.save();

@@ -32,7 +32,7 @@ public class AdminDeleteCommand extends CommandLM {
     @Override
     public IChatComponent onCommand(ICommandSender iCommandSender, String[] strings) throws CommandException {
         checkArgs(strings, 1);
-        IslandUtils.StatusCode status = IslandUtils.deleteIsland(strings[0], null, true);
+        IslandUtils.StatusCode status = IslandUtils.deleteIslandAdmin(strings[0]);
         if (status != IslandUtils.StatusCode.SUCCESS) {
             return error(new ChatComponentText(status.getMessage()));
         }

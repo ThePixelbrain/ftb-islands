@@ -36,7 +36,7 @@ public class DeleteIslandCommand extends CommandLM {
     public IChatComponent onCommand(ICommandSender iCommandSender, String[] strings) throws CommandException {
         checkArgs(strings, 1);
         UUID uuid = getCommandSenderAsPlayer(iCommandSender).getUniqueID();
-        IslandUtils.StatusCode status = IslandUtils.deleteIsland(strings[0], uuid, false);
+        IslandUtils.StatusCode status = IslandUtils.deleteIsland(strings[0], uuid);
         if (status != IslandUtils.StatusCode.SUCCESS) {
             return error(new ChatComponentText(status.getMessage()));
         }
